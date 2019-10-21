@@ -1,0 +1,38 @@
+#!/bin/bash
+
+WORKDIR=$1
+SOURCE=en
+DESTINATION=id
+TIME_RANGE_IN_DAY=1
+
+pushd $WORKDIR
+git stash push  --quiet
+CURRENT_BRANCH=$(git branch --show-current  --quiet)
+git fetch upstream master --quiet
+git checkout upstream/master --quiet
+
+TIME_RANGE=$TIME_RANGE_IN_DAY.day
+
+for cid in $(git log --since=$TIME_RANGE --pretty="%H")
+do
+	for file in $(git show --pretty="" --name-only $cid)
+	do
+		if [[ $file == content/$SOURCE* ]]; then
+			check_exist="${file/content\/$SOURCE/content/$DESTINATION}"
+			if [ ! -f $check_exist ]; then
+				echo "NEW : " $file
+			else
+				echo "UPDATE : " $file
+			fi
+			found=true
+		fi
+	done
+done
+
+if [ ! $found ]; then
+	echo "No update from $SOURCE"
+fi
+
+git checkout $CURRENT_BRANCH --quiet
+git stash pop --quiet
+popd
