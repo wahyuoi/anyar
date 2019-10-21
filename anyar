@@ -5,6 +5,14 @@ SOURCE=en
 DESTINATION=id
 TIME_RANGE_IN_DAY=1
 
+pushd () {
+	command pushd "$@" > /dev/null
+}
+
+popd () {
+	command popd "$@" > /dev/null
+}
+
 pushd $WORKDIR
 git stash push  --quiet
 CURRENT_BRANCH=$(git branch --show-current  --quiet)
